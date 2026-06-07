@@ -1,0 +1,15 @@
+:root {
+
+  --primary: #2563EB;
+  --secondary: #0F172A;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+
+  --shadow-card:
+    0 4px 20px rgba(0,0,0,0.08);
+
+  --font-primary:
+    "Inter", sans-serif;
+}

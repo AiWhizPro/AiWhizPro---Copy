@@ -1,0 +1,19 @@
+Style: Memphis
+Description: Playful and colorful with geometric shapes, bold colors, and offset shadows.
+
+Colors:
+- Primary: #e8879f
+- Secondary: #4db8a8
+- Accent: #f5d76e
+- Background: #faf8f5
+- Surface: #fffef7
+- Text: #1a1a2e
+
+Typography:
+- Heading Font: 'Poppins', sans-serif
+- Body Font: 'Poppins', sans-serif
+
+Design Properties:
+- Border Radius: 12px
+- Border Width: 3px
+- Shadow Offset: 4px 4px

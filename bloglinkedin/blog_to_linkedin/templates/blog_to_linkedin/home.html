@@ -1,0 +1,292 @@
+{% extends 'blog_to_linkedin/base.html' %}
+
+{% block title %}Blog to LinkedIn{% endblock %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-6 py-10 lg:px-8">
+  <!-- Hero Section -->
+  <section class="rounded-3xl bg-gradient-to-r from-indigo-600 to-emerald-500 p-10 text-white shadow-xl">
+    <div class="grid gap-8 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
+      <div>
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-200">Content Repurposing</p>
+        <h1 class="mt-4 text-4xl font-semibold tracking-tight">Convert any blog article into an engaging LinkedIn post.</h1>
+        <p class="mt-6 max-w-2xl text-lg leading-8 text-emerald-100">Use the tool to preserve the core insight, extract lessons, and create a LinkedIn-native post with a strong hook, CTA, and hashtags.</p>
+        <div class="mt-8 flex flex-wrap gap-3">
+          <a href="#upload" class="rounded-full bg-white px-6 py-3 text-sm font-semibold text-slate-900 shadow-lg hover:shadow-2xl transition">Start converting</a>
+          <a href="#how-it-works" class="rounded-full border border-white/40 px-6 py-3 text-sm text-white transition hover:bg-white/10">See how it works</a>
+        </div>
+      </div>
+      <div class="rounded-3xl bg-slate-900/10 p-8 ring-1 ring-white/10">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-200">Why use this?</p>
+        <div class="mt-6 space-y-4 text-slate-100">
+          <p class="text-lg font-semibold">⚡ Fast blog repurposing for professional audience growth.</p>
+          <p>Convert long-form content into a mobile-friendly, readable LinkedIn post in seconds.</p>
+          <ul class="space-y-2 text-sm text-slate-200">
+            <li>✓ Hook-first formatting</li>
+            <li>✓ 3–5 short lessons</li>
+            <li>✓ Ready to engage & share</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content + Sidebar Layout -->
+  <div class="mt-12 grid gap-8 lg:grid-cols-[1fr_350px]">
+    <!-- Main Content Column -->
+    <main class="space-y-8">
+      <!-- Upload Form Section -->
+      <section id="upload" class="rounded-3xl bg-white p-8 shadow-lg">
+        <div>
+          <p class="text-sm font-semibold uppercase tracking-[0.3em] text-slate-500">Upload Area</p>
+          <h2 class="mt-3 text-2xl font-semibold text-slate-900">Paste or upload your blog content</h2>
+          <p class="mt-2 text-sm text-slate-600">Choose one of three ways to get started.</p>
+        </div>
+
+        <form method="post" enctype="multipart/form-data" class="mt-6 space-y-6">
+          {% csrf_token %}
+          <div class="grid gap-6">
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Blog title</label>
+              {{ form.title }}
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Blog URL (optional)</label>
+              {{ form.url }}
+              <p class="mt-2 text-sm text-slate-500">Paste a public link to the blog (we'll fetch it automatically).</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Blog content (optional)</label>
+              {{ form.text }}
+              <p class="mt-2 text-sm text-slate-500">Or paste the article text directly (max: 1200 words).</p>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700">Upload file (optional)</label>
+              {{ form.upload }}
+              <p class="mt-2 text-sm text-slate-500">Supported: .txt, .md, .docx files</p>
+            </div>
+          </div>
+
+          {% if form.non_field_errors %}
+            <div class="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <button type="submit" class="w-full md:w-auto inline-flex items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 px-8 py-3 text-sm font-semibold text-white shadow-lg hover:shadow-xl transition transform hover:scale-105">
+            ✨ Generate LinkedIn post
+          </button>
+        </form>
+      </section>
+
+      <!-- Output Section (when conversion exists) -->
+      {% if conversion %}
+      <section id="output" class="rounded-3xl bg-gradient-to-br from-slate-50 to-emerald-50 p-8 shadow-lg border border-emerald-100">
+        <div class="flex flex-col gap-4 md:flex-row md:items-start md:justify-between md:gap-6">
+          <div>
+            <p class="text-sm uppercase tracking-[0.3em] text-emerald-600 font-semibold">✓ Your LinkedIn Post</p>
+            <h2 class="mt-3 text-2xl font-semibold text-slate-900">Ready to share</h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="copy-output-btn" type="button" class="rounded-full bg-slate-900 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-slate-800 transition">📋 Copy</button>
+            <a id="share-linkedin-btn" href="#" target="_blank" rel="noreferrer" class="rounded-full bg-indigo-600 px-5 py-2 text-sm font-semibold text-white hover:bg-indigo-700 transition">🔗 Share</a>
+          </div>
+        </div>
+        <div class="mt-6 rounded-2xl border border-slate-200 bg-white p-6">
+          <pre id="output-text" class="whitespace-pre-wrap text-sm leading-7 text-slate-900 font-sans">{{ conversion.generated_post }}</pre>
+        </div>
+        <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50/60 p-6">
+          <p class="text-sm font-semibold text-slate-900">💬 What's your biggest takeaway?</p>
+          <p class="mt-3 text-sm leading-7 text-slate-700">Share your thoughts in the comments below to spark meaningful conversations with your network.</p>
+        </div>
+      </section>
+      {% endif %}
+
+      <!-- How it Works Section -->
+      <section id="how-it-works" class="rounded-3xl bg-white p-8 shadow-lg">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">Process</p>
+          <h2 class="mt-3 text-3xl font-semibold text-slate-900">From article to LinkedIn in 3 steps</h2>
+        </div>
+        <div class="mt-8 grid gap-6 lg:grid-cols-3">
+          {% for step in steps %}
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-6 hover:shadow-md transition">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 text-white font-bold text-sm">{{ step.step_number }}</div>
+                <h3 class="text-lg font-semibold text-slate-900">{{ step.title }}</h3>
+              </div>
+              <p class="mt-3 text-sm leading-7 text-slate-600">{{ step.description }}</p>
+            </div>
+          {% empty %}
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-6">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 text-white font-bold">1</div>
+                <h3 class="text-lg font-semibold text-slate-900">Paste your blog</h3>
+              </div>
+              <p class="mt-3 text-sm leading-7 text-slate-600">Upload a file or paste the article text directly.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-6">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 text-white font-bold">2</div>
+                <h3 class="text-lg font-semibold text-slate-900">Generate post</h3>
+              </div>
+              <p class="mt-3 text-sm leading-7 text-slate-600">Our AI extracts the best insights and creates a LinkedIn-ready post.</p>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/50 p-6">
+              <div class="flex items-center gap-3">
+                <div class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-r from-indigo-600 to-emerald-500 text-white font-bold">3</div>
+                <h3 class="text-lg font-semibold text-slate-900">Share & engage</h3>
+              </div>
+              <p class="mt-3 text-sm leading-7 text-slate-600">Copy the post and share it with your network.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+
+      <!-- FAQ Section -->
+      <section id="faq" class="rounded-3xl bg-white p-8 shadow-lg">
+        <div>
+          <p class="text-sm uppercase tracking-[0.3em] text-slate-500">FAQ</p>
+          <h2 class="mt-3 text-3xl font-semibold text-slate-900">Common questions</h2>
+        </div>
+        <div class="mt-8 space-y-6">
+          {% for item in faqs %}
+            <div class="border-b border-slate-200 pb-6 last:border-b-0">
+              <p class="text-sm font-semibold text-slate-900">{{ item.question }}</p>
+              <p class="mt-2 text-sm leading-7 text-slate-600">{{ item.answer }}</p>
+            </div>
+          {% empty %}
+            <div class="border-b border-slate-200 pb-6">
+              <p class="text-sm font-semibold text-slate-900">What formats can I upload?</p>
+              <p class="mt-2 text-sm leading-7 text-slate-600">You can upload .txt, .md, and .docx files directly, or paste content as text.</p>
+            </div>
+            <div class="border-b border-slate-200 pb-6">
+              <p class="text-sm font-semibold text-slate-900">Is there a word limit?</p>
+              <p class="mt-2 text-sm leading-7 text-slate-600">When pasting content, the max is 1200 words. For URLs, we'll fetch and process the entire article.</p>
+            </div>
+            <div>
+              <p class="text-sm font-semibold text-slate-900">Can I edit the generated post?</p>
+              <p class="mt-2 text-sm leading-7 text-slate-600">Absolutely! Copy the post and edit it in LinkedIn before publishing.</p>
+            </div>
+          {% endfor %}
+        </div>
+      </section>
+    </main>
+
+    <!-- Sidebar -->
+    <aside class="space-y-6 lg:sticky lg:top-20 lg:h-fit">
+      <!-- Instructions Card -->
+      <div class="rounded-3xl bg-slate-900/95 p-6 text-slate-100 shadow-xl">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-300 font-semibold">🎯 Quick Start</p>
+        <h3 class="mt-3 text-lg font-semibold">3 easy steps</h3>
+        <ol class="mt-4 space-y-3 text-sm leading-6">
+          <li><strong>1.</strong> Upload your blog</li>
+          <li><strong>2.</strong> Review the post</li>
+          <li><strong>3.</strong> Copy & share</li>
+        </ol>
+      </div>
+
+      <!-- Features Card -->
+      <div class="rounded-3xl bg-indigo-600/95 p-6 text-slate-100 shadow-xl">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-200 font-semibold">⭐ Features</p>
+        <ul class="mt-4 space-y-3 text-sm leading-6">
+          <li>✓ AI-powered extraction</li>
+          <li>✓ Mobile-friendly format</li>
+          <li>✓ Hook + CTA included</li>
+          <li>✓ Instant sharing</li>
+        </ul>
+      </div>
+
+      <!-- Related Tools Card -->
+      {% if tools %}
+      <div class="rounded-3xl bg-slate-900/95 p-6 text-slate-100 shadow-xl">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-300 font-semibold">🔗 More Tools</p>
+        <div class="mt-4 space-y-3">
+          {% for tool in tools %}
+            <a href="{{ tool.url }}" target="_blank" rel="noreferrer" class="block rounded-2xl border border-slate-700 bg-slate-950/80 p-3 text-xs hover:border-emerald-400 transition">
+              <p class="font-semibold text-emerald-300">{{ tool.title }}</p>
+              <p class="mt-1 text-slate-400">{{ tool.description }}</p>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Related Blogs Card -->
+      {% if blogs %}
+      <div class="rounded-3xl bg-slate-900/95 p-6 text-slate-100 shadow-xl">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-300 font-semibold">📚 Learn More</p>
+        <div class="mt-4 space-y-3">
+          {% for blog in blogs %}
+            <a href="{{ blog.url }}" target="_blank" rel="noreferrer" class="block rounded-2xl border border-slate-700 bg-slate-950/80 p-3 text-xs hover:border-indigo-400 transition">
+              <p class="font-semibold text-indigo-300">{{ blog.title }}</p>
+              <p class="mt-1 text-slate-400">{{ blog.description }}</p>
+            </a>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- Share & Spread CTA Card -->
+      <div class="rounded-3xl bg-gradient-to-br from-slate-900 to-slate-800 p-6 text-slate-100 shadow-xl border border-emerald-500/20">
+        <p class="text-sm uppercase tracking-[0.3em] text-emerald-300 font-semibold">📢 Spread the word</p>
+        <p class="mt-3 text-sm leading-6 text-slate-300">Love this tool? Share it with your network!</p>
+        <div class="mt-4 flex flex-col gap-2">
+          <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ request.build_absolute_uri }}" target="_blank" rel="noreferrer" class="rounded-full bg-indigo-600 px-4 py-2 text-xs font-semibold text-white text-center hover:bg-indigo-700 transition">Share on LinkedIn</a>
+          <a href="https://twitter.com/intent/tweet?text=Check+out+this+Blog+to+LinkedIn+converter+tool&url={{ request.build_absolute_uri }}" target="_blank" rel="noreferrer" class="rounded-full border border-slate-600 px-4 py-2 text-xs font-semibold text-slate-200 text-center hover:border-emerald-400 transition">Tweet it</a>
+        </div>
+      </div>
+
+      <!-- Social Proof / Stats Card -->
+      <div class="rounded-3xl bg-white p-6 shadow-lg border border-slate-200">
+        <p class="text-sm font-semibold text-slate-900">Why creators love this</p>
+        <ul class="mt-4 space-y-2 text-xs text-slate-600">
+          <li>⚡ <strong>Saves 30 mins</strong> of writing</li>
+          <li>🎯 <strong>Better engagement</strong> on posts</li>
+          <li>♻️ <strong>Repurpose effortlessly</strong></li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+{% if conversion %}
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    var outputSection = document.getElementById('output');
+    if (!outputSection) return;
+
+    outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    var outputText = document.getElementById('output-text');
+    var copyButton = document.getElementById('copy-output-btn');
+    var shareButton = document.getElementById('share-linkedin-btn');
+
+    if (copyButton && outputText) {
+      copyButton.addEventListener('click', function () {
+        var text = outputText.innerText.trim();
+        navigator.clipboard.writeText(text).then(function () {
+          copyButton.textContent = '✓ Copied!';
+          setTimeout(function () {
+            copyButton.textContent = '📋 Copy';
+          }, 2000);
+        }).catch(function () {
+          window.alert('Copy failed. Please use your browser copy command.');
+        });
+      });
+    }
+
+    if (shareButton && outputText) {
+      var shareText = outputText.innerText.trim();
+      var pageUrl = '{{ request.build_absolute_uri|escapejs }}';
+      var shareParams = new URLSearchParams({
+        mini: 'true',
+        url: pageUrl,
+        title: 'Repurposed LinkedIn post',
+        summary: shareText,
+      });
+      shareButton.href = 'https://www.linkedin.com/shareArticle?' + shareParams.toString();
+    }
+  });
+</script>
+{% endif %}
+{% endblock %}
+
