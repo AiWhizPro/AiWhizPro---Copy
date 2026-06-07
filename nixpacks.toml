@@ -1,0 +1,26 @@
+[build]
+# Python version
+python_version = "3.11"
+
+# Install phase: install dependencies from requirements.txt
+install.commands = [
+    "pip install -r requirements.txt",
+]
+
+# Build phase: collect static files
+build.commands = [
+    "cd bloglinkedin",
+    "python manage.py collectstatic --noinput || true",
+]
+
+[start]
+# Start command
+cmd = "cd bloglinkedin && gunicorn --bind 0.0.0.0:8000 --workers 4 bloglinkedin.wsgi:application"
+
+[env]
+# Environment variables for production
+DEBUG = "False"
+# Add these via deployment platform secrets:
+# SECRET_KEY = "your-secret-key"
+# DATABASE_URL = "postgresql://..."
+# ALLOWED_HOSTS = "your-domain.com"
